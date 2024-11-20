@@ -164,7 +164,12 @@ export const insertPart = (
       let start: Node | null = part._$startNode;
       while (start !== endNode) {
         const n: Node | null = wrap(start!).nextSibling;
-        wrap(container).insertBefore(start!, refNode);
+        const wrapper = wrap(container);
+        (wrapper.moveBefore ?? wrapper.insertBefore).call(
+          wrapper,
+          start!,
+          refNode
+        );
         start = n;
       }
     }
@@ -172,6 +177,12 @@ export const insertPart = (
 
   return part;
 };
+
+declare global {
+  interface Node {
+    moveBefore<T extends Node>(node: T, child: Node | null): T;
+  }
+}
 
 /**
  * Sets the value of a Part.

@@ -123,14 +123,14 @@ export const insertPart = (
   refPart?: ChildPart,
   part?: ChildPart
 ): ChildPart => {
-  const container = wrap(containerPart._$startNode).parentNode!;
+  const container = wrap(wrap(containerPart._$startNode).parentNode!);
 
   const refNode =
     refPart === undefined ? containerPart._$endNode : refPart._$startNode;
 
   if (part === undefined) {
-    const startNode = wrap(container).insertBefore(createMarker(), refNode);
-    const endNode = wrap(container).insertBefore(createMarker(), refNode);
+    const startNode = container.insertBefore(createMarker(), refNode);
+    const endNode = container.insertBefore(createMarker(), refNode);
     part = new ChildPart(
       startNode,
       endNode,
@@ -162,14 +162,19 @@ export const insertPart = (
     }
     if (endNode !== refNode || parentChanged) {
       let start: Node | null = part._$startNode;
+      // moveBefore() cannot be called if either the new parent or the node to
+      // move is disconnected, so we fall back to insertBefore() in that case.
+      // The node's old parent's connected state will match the node's connected
+      // state, so we can use that to determine whether to use insertBefore().
+      // See https://github.com/whatwg/dom/pull/1307/commits/fbbde69efac33d3e4ee36a818101975a37941f8e
+      const moveMethod =
+        wrap(part._$endNode!).isConnected === false ||
+        container.isConnected === false
+          ? container.insertBefore
+          : container.moveBefore ?? container.insertBefore;
       while (start !== endNode) {
         const n: Node | null = wrap(start!).nextSibling;
-        const wrapper = wrap(container);
-        (wrapper.moveBefore ?? wrapper.insertBefore).call(
-          wrapper,
-          start!,
-          refNode
-        );
+        moveMethod.call(container, start!, refNode);
         start = n;
       }
     }

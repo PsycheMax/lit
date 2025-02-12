@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {html, nothing, render} from '../../lit-html.js';
-import {guard} from '../../directives/guard.js';
-import {Directive, directive, PartInfo} from '../../directive.js';
-import {stripExpressionMarkers} from '../test-utils/strip-markers.js';
-import {assert} from '@esm-bundle/chai';
+import {html, nothing, render} from 'lit-html';
+import {guard} from 'lit-html/directives/guard.js';
+import {Directive, directive, PartInfo} from 'lit-html/directive.js';
+import {stripExpressionMarkers} from '@lit-labs/testing';
+import {assert} from 'chai';
 
 suite('guard', () => {
   let container: HTMLDivElement;

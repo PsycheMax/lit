@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {live} from '../../directives/live.js';
-import {html, noChange, nothing, render} from '../../lit-html.js';
-import {assert} from '@esm-bundle/chai';
+import {live} from 'lit-html/directives/live.js';
+import {html, noChange, nothing, render} from 'lit-html';
+import {assert} from 'chai';
 
 class LiveTester extends HTMLElement {
   _x?: string;

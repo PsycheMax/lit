@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {repeat} from '../../directives/repeat.js';
-import {render, html} from '../../lit-html.js';
-import {stripExpressionMarkers} from '../test-utils/strip-markers.js';
-import {assert} from '@esm-bundle/chai';
+import {repeat} from 'lit-html/directives/repeat.js';
+import {render, html} from 'lit-html';
+import {stripExpressionMarkers} from '@lit-labs/testing';
+import {assert} from 'chai';
 
 function assertItemIdentity(
   oldChildren: HTMLElement[],

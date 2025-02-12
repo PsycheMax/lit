@@ -1,5 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json",
+  "root": "../../../../",
   "timeout": 0,
   "sampleSize": 50,
   "benchmarks": [
@@ -22,17 +23,17 @@
       "expand": [
         {
           "name": "this-change",
-          "url": "lit-html/template-heavy/template-heavy.html"
+          "url": "template-heavy.html"
         },
         {
           "name": "tip-of-tree",
-          "url": "lit-html/template-heavy/template-heavy.html",
+          "url": "template-heavy.html",
           "packageVersions": {
             "label": "tip-of-tree",
             "dependencies": {
               "lit-html": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/lit-html",
                 "setupCommands": [
@@ -43,7 +44,7 @@
               },
               "lit-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/lit-element",
                 "setupCommands": [
@@ -54,7 +55,7 @@
               },
               "@lit/reactive-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/reactive-element",
                 "setupCommands": [
@@ -68,7 +69,7 @@
         },
         {
           "name": "previous-release",
-          "url": "lit-html/template-heavy/template-heavy.html",
+          "url": "template-heavy.html",
           "packageVersions": {
             "label": "previous-release",
             "dependencies": {
@@ -76,7 +77,7 @@
               "lit-element": "^2.0.0",
               "@lit/reactive-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/reactive-element",
                 "setupCommands": [

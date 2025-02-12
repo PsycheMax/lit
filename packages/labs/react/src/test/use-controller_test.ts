@@ -1,30 +1,26 @@
 /**
  * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2018 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
-// import * as ReactModule from 'react';
-import 'react/umd/react.development.js';
-import 'react-dom/umd/react-dom.development.js';
-import {useController} from '../use-controller.js';
-import {assert} from '@esm-bundle/chai';
+import * as React from 'react';
+// eslint-disable-next-line import/extensions
+import {createRoot, Root} from 'react-dom/client';
+// eslint-disable-next-line import/extensions
+import {act} from 'react-dom/test-utils';
+import {useController} from '@lit-labs/react/use-controller.js';
+import {assert} from 'chai';
 import {
   ReactiveController,
   ReactiveControllerHost,
 } from '@lit/reactive-element';
 
-const {React, ReactDOM} = window;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 suite('useController', () => {
+  let root: Root;
   let container: HTMLElement;
   let ctorCallCount = 0;
 
@@ -32,9 +28,15 @@ suite('useController', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     ctorCallCount = 0;
+    root = createRoot(container);
   });
 
   teardown(() => {
+    if (root) {
+      act(() => {
+        root.unmount();
+      });
+    }
     if (container && container.parentNode) {
       container.parentNode.removeChild(container);
     }
@@ -77,33 +79,96 @@ suite('useController', () => {
     );
   };
 
-  test('basic lifecycle', () => {
-    let testController!: TestController;
+  const lifeCycleTest = ({strict}: {strict: boolean}) => {
+    test(`basic lifecycle${strict ? ' - strict mode' : ''}`, () => {
+      let testController!: TestController;
 
-    const TestComponent = ({x}: {x: number}) => {
-      testController = useTest('a');
-      return React.createElement('div', {className: 'foo'}, [
-        `x:${x}, a:${testController.a}`,
+      let componentRenderLog: string[] = [];
+      let componentLayoutEffectLog: string[] = [];
+
+      const TestComponent = ({x}: {x: number}) => {
+        testController = useTest('a');
+        // Record the state of the testController's log when the component
+        // runs. It should have at least run `connect + update` by now.
+        componentRenderLog = [...testController.log];
+        React.useLayoutEffect(() => {
+          // Record the state of the testController's log when the component
+          // runs. It should have completed an update by now.
+          componentLayoutEffectLog = [...testController.log];
+        });
+        return React.createElement('div', {className: 'foo'}, [
+          `x:${x}, a:${testController.a}`,
+        ]);
+      };
+
+      const render = (props: any) => {
+        const component = React.createElement(TestComponent, props);
+        act(() => {
+          root.render(
+            strict
+              ? React.createElement(React.StrictMode, {}, component)
+              : component
+          );
+        });
+      };
+
+      render({x: 1});
+      // Note, strict mode 2x renders
+      const expectedCtorCallCount = strict ? 2 : 1;
+      // TODO(sorvell): in strict mode, this would be more correct if it were
+      // ['update', 'updated', 'update'] since that would indicate the first
+      // strict mode render was properly balanced, but React does
+      // "2x render then effects" in strict mode so this would require
+      // explicitly detecting this case. Ignoring for now since relying on this
+      // seems like a corner case.
+      const expectedNonInitialRenderUpdates = strict
+        ? ['update', 'update']
+        : ['update'];
+
+      // As of React 18, strict mode simulates effects being destroyed and recreated
+      // https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-re-running-effects-in-development
+      const expectedControllerUpdates = strict
+        ? [
+            'connected',
+            'update',
+            'updated',
+            'disconnected',
+            'connected',
+            'updated',
+          ]
+        : ['connected', 'update', 'updated'];
+
+      assert.equal(ctorCallCount, expectedCtorCallCount);
+      assert.equal(container.innerHTML, `<div class="foo">x:1, a:a</div>`);
+      // Tests the state of the controllerLog in the component's render.
+      // We expect the controller to have run `connected + update` when
+      // `useController` returns in the component.
+      assert.deepEqual(componentRenderLog, ['connected', 'update']);
+      assert.deepEqual(testController.log, expectedControllerUpdates);
+      // Tests the state of the controllerLog in a `useLayoutEffect` callback
+      // used in the component. We expect the controller to have completed
+      // an update by then.
+      assert.deepEqual(componentLayoutEffectLog, testController.log);
+      const firstTestController = testController;
+      componentRenderLog.length =
+        componentLayoutEffectLog.length =
+        testController.log.length =
+          0;
+      render({x: 2});
+      assert.equal(ctorCallCount, expectedCtorCallCount);
+      assert.equal(container.innerHTML, `<div class="foo">x:2, a:a</div>`);
+      assert.deepEqual(componentRenderLog, expectedNonInitialRenderUpdates);
+      assert.deepEqual(testController.log, [
+        ...expectedNonInitialRenderUpdates,
+        'updated',
       ]);
-    };
+      assert.deepEqual(componentLayoutEffectLog, testController.log);
+      assert.strictEqual(testController, firstTestController);
+    });
+  };
 
-    const render = (props: any) => {
-      ReactDOM.render(React.createElement(TestComponent, props), container);
-    };
-
-    render({x: 1});
-    assert.equal(ctorCallCount, 1);
-    assert.equal(container.innerHTML, `<div class="foo">x:1, a:a</div>`);
-    assert.deepEqual(testController.log, ['connected', 'update', 'updated']);
-    const firstTestController = testController;
-
-    testController.log.length = 0;
-    render({x: 2});
-    assert.equal(ctorCallCount, 1);
-    assert.equal(container.innerHTML, `<div class="foo">x:2, a:a</div>`);
-    assert.deepEqual(testController.log, ['update', 'updated']);
-    assert.strictEqual(testController, firstTestController);
-  });
+  lifeCycleTest({strict: false});
+  lifeCycleTest({strict: true});
 
   test('requestUpdate', async () => {
     let testController!: TestController;
@@ -116,18 +181,33 @@ suite('useController', () => {
     };
 
     const render = (props: any) => {
-      ReactDOM.render(React.createElement(TestComponent, props), container);
+      act(() => {
+        root.render(React.createElement(TestComponent, props));
+      });
     };
 
+    // Initial render
     render({x: 1});
     assert.deepEqual(testController.log, ['connected', 'update', 'updated']);
-    testController.log.length = 0;
-    testController.a = 'b';
-    testController.host.requestUpdate();
 
-    await new Promise((r) => setTimeout(r, 0));
+    // Update 1
+    await act(async () => {
+      testController.log.length = 0;
+      testController.a = 'b';
+      testController.host.requestUpdate();
+    });
 
     assert.equal(container.innerHTML, `<div class="foo">x:1, a:b</div>`);
+    assert.deepEqual(testController.log, ['update', 'updated']);
+
+    // Update 2
+    await act(async () => {
+      testController.log.length = 0;
+      testController.a = 'c';
+      testController.host.requestUpdate();
+    });
+
+    assert.equal(container.innerHTML, `<div class="foo">x:1, a:c</div>`);
     assert.deepEqual(testController.log, ['update', 'updated']);
   });
 
@@ -141,11 +221,15 @@ suite('useController', () => {
       ]);
     };
 
-    ReactDOM.render(React.createElement(TestComponent, {x: 1}), container);
+    act(() => {
+      root.render(React.createElement(TestComponent, {x: 1}));
+    });
     assert.deepEqual(testController.log, ['connected', 'update', 'updated']);
     testController.log.length = 0;
 
-    ReactDOM.render(React.createElement('div'), container);
+    act(() => {
+      root.render(React.createElement('div'));
+    });
     assert.equal(container.innerHTML, `<div></div>`);
     assert.deepEqual(testController.log, ['disconnected']);
   });
@@ -173,7 +257,9 @@ suite('useController', () => {
     };
 
     const render = (props: any) => {
-      ReactDOM.render(React.createElement(TestComponent, props), container);
+      act(() => {
+        root.render(React.createElement(TestComponent, props));
+      });
     };
 
     render({x: 1});

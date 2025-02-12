@@ -1,8 +1,8 @@
-# Contributing to lit-html
+# Contributing to Lit
 
-Thank you for your interest in contributing to lit-html!
+Thank you for your interest in contributing to Lit!
 
-There are many ways to contribute to lit-html project, and we have many different needs to be addressed. All contributions, from PRs to reports of successful usage, are appreciated and valuable.
+There are many ways to contribute to the Lit project, and we have many different needs to be addressed. All contributions, from issues, to PRs, to reports of successful usage, are appreciated and valuable.
 
 ## Code of Conduct
 
@@ -10,23 +10,38 @@ We have a [Code of Conduct](./CODE_OF_CONDUCT.md), please follow it in all inter
 
 ## Filing Issues
 
-Issues are one of the most important ways to contribute to lit-html.
+Issues are one of the most important ways to contribute to Lit.
 
 Please search though open and closed issues to see if a similar issue already exists. If not, open an issue and try to provide a minimal reproduction if you can.
 
 Occasionally we'll close issues if they appear stale or are too vague - please don't take this personally! Please feel free to re-open issues we've closed if there's something we've missed and they still need to be addressed.
 
+## RFCs
+
+The Lit project handles "significant" changes and feature requests via our [RFC (Request for Comment) Process](https://github.com/lit/rfcs).
+
+Medium-to-large feature requests should be done via RFC, and feature request issues may be closed after asking that they be submitted as an RFC. If you're wondering whether there's interest in an idea before creating an RFC, file an [RRFC issue](https://github.com/lit/rfcs#before-opening-an-rfc) in https://github.com/lit/rfcs to discuss it.
+
 ## Pull Requests
 
 Pull requests are greatly appreciated! To ensure a smooth review process, please follow these steps:
 
-1.  Make sure there's an open issue that the PR addresses. Add "Fixes #(issue number)" to the PR description.
+1.  Make sure there's an open issue or RFC that the PR addresses. If there's an issue, add "Fixes #(issue number)" to the PR description.
 2.  Please discuss the general shape of the change ahead of time. This can save much time for reviewers and submitters alike. Many times there may be existing ideas on how to handle an issue that are not fully written out, and asking about it will bring out more details.
 3.  All PRs that change behavior or fix bugs should have new or updated tests.
 4.  Try to create a set of descriptive commits that each do one focused change. Avoid commits like "oops", and prefer commits like "Added method foo to Bar".
 5.  When addressing review comments, try to add new commits, rather than modifying previous commits. This makes it easier for reviewers to see what changed since the last review. `git commit --fixup {SHA}` is really useful for this. Obviously, requests like "Please rebase onto master" require changing commits.
 6.  If you [allow changes to be committed to your PR branches](https://help.github.com/articles/allowing-changes-to-a-pull-request-branch-created-from-a-fork/) we can fix some small things in the PR for you, speeding up the review process. This is especially useful if you're new to TypeScript and need help with type annotations.
 7.  Please run `npm run lint` and `npm run format` before submitting PRs. PRs that don't lint and aren't formatted will fail continuous integration tests.
+8.  This repo uses [changesets](https://github.com/changesets/changesets). All PRs _must_ have a changeset file. Run `npm run changeset` to create one.
+
+    If you change one of the "core" libraries, (`lit-html`, `@lit/reactive-element`, `lit-element` and `lit`), include the other core libraries that depend on it in the change. For example, if you change lit-html, include lit-element and lit in the change. This will ensure that there's a version of the dependant library that can be used to guarentee that the dependent library is updated.
+
+    If you made a change that doesn't require the release of a package - like adding tests - you can generate an empty changeset with `npm run changeset -- --empty`.
+
+## Discord Chat
+
+Our engineering team uses the [Lit Discord](https://lit.dev/discord/) to chat. You can read the development channels, or join us in `#get-involved`.
 
 ## Code Style
 
@@ -39,7 +54,7 @@ We follow the [Google JavaScript Style Guide](https://google.github.io/styleguid
 
 ## TypeScript
 
-We use TypeScript on lit-html in order to automatically check the code for type errors and document the types of fields and attributes for easier reading. If you don't know TypeScript, we hope it doesn't discourage you from contributing - TypeScript is a superset of JavaScript that focuses on adding type annotations.
+We use TypeScript on Lit in order to automatically check the code for type errors and document the types of fields and attributes for easier reading. If you don't know TypeScript, we hope it doesn't discourage you from contributing - TypeScript is a superset of JavaScript that focuses on adding type annotations.
 
 TypeScript is hopefully relatively easy to pick up, but if you have any problems we're more than happy to help. You can submit a pull request with type warnings and we'll either help you fix them, or if you allow commits to your PR branch, fix them for you. VS Code is a very nice IDE for TypeScript development if you care to try it.
 
@@ -68,7 +83,7 @@ shared between different versions of the libraries on the same page.
 When submitting code, please take care to follow the conventions below:
 
 1. **`_` prefix for private properties** - Most`private`-annotated fields should
-   be prefixed prefixed with a single underscore, and will be minified
+   be prefixed with a single underscore, and will be minified
    ("mangled" by Terser) to a randomly-assigned short property name. See the
    following two cases for exceptions.
 2. **`_$` prefix for private properties on objects shared between versions** - Any
@@ -92,11 +107,17 @@ If you've already signed a CLA but are still getting bothered by the awfully ins
 
 ## Set up
 
+You'll need at least [**Node** >= `18.15.0`](https://nodejs.org/en) installed on your machine.
+
+Once the minimum Node version is installed, you can continue with the rest of the repo setup.
+
 ```bash
-git clone https://github.com/Polymer/lit-html.git
-cd lit-html
-npm install
-npm run bootstrap
+node -v
+v18.15.0
+
+git clone https://github.com/lit/lit.git
+cd lit
+npm ci
 npm run build
 ```
 

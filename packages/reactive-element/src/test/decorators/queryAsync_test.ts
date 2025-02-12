@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {queryAsync} from '../../decorators/query-async.js';
+import {queryAsync} from '@lit/reactive-element/decorators/query-async.js';
 import {
   canTestReactiveElement,
   generateElementName,
   RenderingElement,
   html,
 } from '../test-helpers.js';
-import {assert} from '@esm-bundle/chai';
+import {assert} from 'chai';
 
 (canTestReactiveElement ? suite : suite.skip)('@queryAsync', () => {
   let container: HTMLElement;
@@ -21,7 +21,7 @@ import {assert} from '@esm-bundle/chai';
     @queryAsync('#blah') blah!: Promise<HTMLDivElement>;
     @queryAsync('span') nope!: Promise<HTMLSpanElement | null>;
 
-    static properties = {foo: {}};
+    static override properties = {foo: {}};
 
     declare foo: boolean;
 
@@ -31,7 +31,7 @@ import {assert} from '@esm-bundle/chai';
       this.foo = false;
     }
 
-    render() {
+    override render() {
       return html`
         <div>Not this one</div>
         ${this.foo

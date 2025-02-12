@@ -1,10 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json",
+  "root": "../../../../",
   "sampleSize": 50,
   "timeout": 0,
   "benchmarks": [
     {
-      "url": "reactive-element/list/index.html",
+      "url": "index.html",
       "browser": {
         "name": "chrome",
         "headless": true
@@ -34,7 +35,7 @@
             "dependencies": {
               "lit-html": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/lit-html",
                 "setupCommands": [
@@ -45,7 +46,7 @@
               },
               "lit-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/lit-element",
                 "setupCommands": [
@@ -56,7 +57,7 @@
               },
               "@lit/reactive-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/reactive-element",
                 "setupCommands": [
@@ -77,7 +78,7 @@
               "lit-element": "^2.0.0",
               "@lit/reactive-element": {
                 "kind": "git",
-                "repo": "https://github.com/Polymer/lit-html.git",
+                "repo": "https://github.com/lit/lit-html.git",
                 "ref": "main",
                 "subdir": "packages/reactive-element",
                 "setupCommands": [
